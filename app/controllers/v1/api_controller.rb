@@ -5,30 +5,7 @@ include PayPal::SDK::Core::Logging
 class V1::ApiController < ApplicationController
   
   def get_rich_people
-    test = '{
-  "rich_people": [
-    {
-      "name": "Shikhir",
-      "points": 1000,
-      "rank": 1
-    },
-    {
-      "name": "Saurabh",
-      "points": 999,
-      "rank": 2
-    },
-    {
-      "name": "Priyatosh",
-      "points": 998,
-      "rank": 3
-    },
-    {
-      "name": "Johari",
-      "points": 997,
-      "rank": 4
-    }
-  ]
-}'
+    test = '{"rich_people": [{"name": "Shikhir","points": 1000,"rank": 1},{"name": "Saurabh","points": 999,"rank": 2},{"name": "Priyatosh","points": 998,"rank": 3},{"name": "Johari","points": 997,"rank": 4}]}'
     json_response(test, :ok)
   end
 
@@ -65,14 +42,14 @@ class V1::ApiController < ApplicationController
 		        :name => "Gold Coin",
 		        :sku => "gcoin",
 		        :price => "#{gcprice}",
-		        :currency => "USD",
+		        :currency => PAYPAL_CURRENCY,
 		        :quantity => quantity }]},
 
 		    # ###Amount
 		    # Let's you specify a payment amount.
 		    :amount =>  {
 		      :total =>  "#{gcprice * quantity}",
-		      :currency =>  "USD" },
+		      :currency =>  PAYPAL_CURRENCY },
 		    :description =>  "This is the payment transaction description." }]})
 
 		# Create Payment and return status
@@ -101,4 +78,40 @@ class V1::ApiController < ApplicationController
 	  	raise "Error processing"
 	  end
   end
+
+  def create_user
+  	data = params
+  	user = User.find_by(fbid: data.id)
+  	if user.empty?
+	  	user = User.new
+
+	  	user.fbid = data.id
+	  	user.fblogin = true
+
+	  	if data.key?("first_name")
+	  		user.first_name = data.first_name
+	  	end
+
+	  	if data.key?("last_name")
+	  		user.last_name = data.last_name
+	  	end
+
+	  	if data.key?("gender")
+	  		user.gender = data.gender
+	  	end
+
+	  	if data.key?("locale")
+	  		user.locale = data.locale
+	  	end
+
+	  	if data.key?("picture")
+	  		user.picture_url = data.picture.data.url
+	  	end
+	  	user.coins = 0
+
+	  	user.save
+	  end
+  	json_response(user, :ok)
+  end
+
 end

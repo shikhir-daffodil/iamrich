@@ -4,6 +4,7 @@ Rails.application.routes.draw do
     get 'api/get_rank'
     get 'api/buy_coins'
     get 'api/paypal_execute'
+    post 'api/create_user'
   end
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
